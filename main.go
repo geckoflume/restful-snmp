@@ -7,11 +7,26 @@ import (
 	"github.com/alouca/gosnmp"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/sontags/env"
 	"github.com/sontags/logger"
 	"github.com/unrolled/render"
 )
 
+type Configuration struct {
+	Port   string `json:"port"`
+	Listen string `json:"listen"`
+}
+
+var config = &Configuration{}
+
+func init() {
+	env.Var(&config.Port, "PORT", "8080", "Port to bind to")
+	env.Var(&config.Listen, "LISTEN", "0.0.0.0", "IP address to bind to")
+}
+
 func main() {
+	env.Parse("RS", false)
+
 	router := mux.NewRouter()
 	router.HandleFunc("/", PrintDoc).Methods("GET")
 	router.HandleFunc("/{node}/{oid}", GetOID).Methods("GET")
@@ -21,7 +36,7 @@ func main() {
 	)
 	n.UseHandler(router)
 
-	http.ListenAndServe(":8080", n)
+	http.ListenAndServe(config.Listen+":"+config.Port, n)
 }
 
 func GetOID(res http.ResponseWriter, req *http.Request) {
