@@ -10,11 +10,11 @@ var help = `
 </code></pre>
 <p>Where <code>[device_to_query]</code> is an IP address or an FQDN of a device (eg. a switch, router etc.) that runs an SNMP agent and <code>[oid_to_fetch]</code> is the OID that should be queried.</p>
 <p>The response in case of a successful SNMP GET query comes as a HTTP 200 containing JSON of the following schema:</p>
-<pre><code><span class="hljs-rules">{
-    <span class="hljs-rule"><span class="hljs-attribute">Name</span>:<span class="hljs-value"> <span class="hljs-string">".1.3.6.1.4.1.6.3.16.1.1.1.1.4.49.51.51.52"</span>,
-    Type: <span class="hljs-number">4</span>,
-    Value: <span class="hljs-string">"1334"</span>
-</span></span></span>}
+<pre><code>{
+    <span class="hljs-attribute">Name</span>: <span class="hljs-value"><span class="hljs-string">".1.3.6.1.4.1.6.3.16.1.1.1.1.4.49.51.51.52"</span></span>,
+    <span class="hljs-attribute">Type</span>: <span class="hljs-value"><span class="hljs-number">4</span></span>,
+    <span class="hljs-attribute">Value</span>: <span class="hljs-value"><span class="hljs-string">"1334"</span></span>
+}
 </code></pre>
 <p>If you only care about the value just append <code>only_value=true</code> to the value string.</p>
 <h2><a id="Specify_a_SNMP_community_other_that_public_21"></a>Specify a SNMP community other that <code>public</code></h2>
