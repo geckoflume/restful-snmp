@@ -76,15 +76,12 @@ func GetOID(res http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, v := range resp.Variables {
-		switch v.Type {
-		case gosnmp.OctetString:
-			if valueOnly {
-				r.JSON(res, http.StatusOK, v.Value)
-			} else {
-				r.JSON(res, http.StatusOK, v)
-			}
-			return
+		if valueOnly {
+			r.JSON(res, http.StatusOK, v.Value)
+		} else {
+			r.JSON(res, http.StatusOK, v)
 		}
+		return
 	}
 
 	r.JSON(res, http.StatusNotFound, "No matching OID found")
