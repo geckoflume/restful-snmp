@@ -29,7 +29,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", PrintDoc).Methods("GET")
-	router.HandleFunc("/{node}/{oid}", GetOID).Methods("GET")
+	router.HandleFunc("/{node}/", GetOID).Methods("GET")
 	n := negroni.New(
 		negroni.NewRecovery(),
 		logger.NewLogger(),
@@ -49,14 +49,18 @@ func GetOID(res http.ResponseWriter, req *http.Request) {
 		valueOnly = true
 	}
 
+	oids, present := req.URL.Query()["oid"]
+	if !present || len(oids) == 0 {
+		r.JSON(res, http.StatusBadRequest, "No OID provided")
+		return
+	}
+
 	rq := struct {
 		community string
 		node      string
-		oid       string
 	}{
 		req.URL.Query().Get("community"),
 		vars["node"],
-		vars["oid"],
 	}
 
 	if rq.community == "" {
@@ -69,22 +73,24 @@ func GetOID(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp, err := snmp.Get(rq.oid)
-	if err != nil {
-		r.JSON(res, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	for _, v := range resp.Variables {
-		if valueOnly {
-			r.JSON(res, http.StatusOK, v.Value)
-		} else {
-			r.JSON(res, http.StatusOK, v)
+	values := make(map[int]interface{}, len(oids))
+	for index, oid := range oids {
+		resp, err := snmp.Get(oid)
+		if err != nil {
+			r.JSON(res, http.StatusInternalServerError, err.Error())
+			return
 		}
-		return
+
+		for _, v := range resp.Variables {
+			if valueOnly {
+				values[index] = v.Value
+			} else {
+				values[index] = v
+			}
+		}
 	}
 
-	r.JSON(res, http.StatusNotFound, "No matching OID found")
+	r.JSON(res, http.StatusOK, values)
 }
 
 func PrintDoc(res http.ResponseWriter, req *http.Request) {
